@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:freeflow/screens/login_screen.dart';
 import '../components/CustomTextField.dart';
 import '../components/CustomButton.dart';
 import 'package:freeflow/components/square_title.dart';
@@ -24,53 +25,77 @@ class _RegisterPageState extends State<RegisterPage> {
 
   bool _isNotValidate = false;
 
-  void signUserUp() {
-    setState(() {
-      _isNotValidate = false; // Reset validation flag
-
-      if (firstNameController.text.isEmpty ||
-          lastNameController.text.isEmpty ||
-          emailController.text.isEmpty ||
-          passwordController.text.isEmpty ||
-          confirmPasswordController.text.isEmpty) {
-        _isNotValidate = true; // Set validation flag if any field is empty
-      } else if (passwordController.text != confirmPasswordController.text) {
-        _isNotValidate = true; // Set validation flag if passwords don't match
-      } else {
-        // Implement sign-up logic here
-
-        // Create object with email and password
-        var regBody = {
-          'email': emailController.text,
-          'password': passwordController.text,
-        };
-
-        // Send HTTP POST request
-        http.post(
-          Uri.parse(registration),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(regBody),
-        ).then((response) {
-          var jsonResponse = jsonDecode(response.body);
-          if (jsonResponse['status'] == 200) {
-            // Successful sign-up
-            debugPrint('created an account');
-          } else {
-            // Handle server error
-            debugPrint('failed to create an account');
-          }
-        }).catchError((error) {
-          // Handle network error
-        });
-      }
-    });
-  }
+  
 
   //define the variable used for spacing
   final double spaceBetween = 16;
 
   @override
   Widget build(BuildContext context) {
+
+    void signUserUp() {
+  setState(() {
+    _isNotValidate = false; // Reset validation flag
+
+    if (firstNameController.text.isEmpty ||
+        lastNameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
+      _isNotValidate = true; // Set validation flag if any field is empty
+    } else if (passwordController.text != confirmPasswordController.text) {
+      _isNotValidate = true; // Set validation flag if passwords don't match
+    } else {
+      // Implement sign-up logic here
+
+      // Create object with email and password
+      var regBody = {
+        'email': emailController.text,
+        'password': passwordController.text,
+      };
+
+      // Send HTTP POST request
+      http.post(
+        Uri.parse(registration),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(regBody),
+      ).then((response) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['status'] == 200) {
+          // Successful sign-up
+          debugPrint('created an account');
+          // Show success popup
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Success'),
+                content: Text('Your account has been created successfully!'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Navigate back to login screen
+                      widget.onTap?.call();
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          // Handle server error
+          debugPrint('failed to create an account');
+        }
+      }).catchError((error) {
+        // Handle network error
+      });
+    }
+  });
+}
+
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -158,7 +183,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             GestureDetector(
                               onTap: widget.onTap,
                               child: const Text(
-                                ' Login now',
+                                'Login now',
                                 style: TextStyle(
                                  color: Color.fromARGB(255, 71, 48, 1),
                                   fontWeight: FontWeight.bold,
