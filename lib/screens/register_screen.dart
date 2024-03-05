@@ -20,6 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController cellNumberController = TextEditingController();
 
   bool _isNotValidate = false;
 
@@ -140,7 +141,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         SizedBox(height: spaceBetween),
                         CustomTextField(
-                          controller: confirmPasswordController,
+                          controller: cellNumberController,
                           hintText: 'Cell Number(optional)',
                           obscureText: true,
                           isNotValidate: false,
