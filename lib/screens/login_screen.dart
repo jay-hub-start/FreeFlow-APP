@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
         ).then((response) {
           //debugPrint(response.body); // Print response body to debug console
           var jsonResponse = jsonDecode(response.body);
-          if(jsonResponse["status"]){
+          if(jsonResponse["status"] == 200){
             var myToken = jsonResponse["token"];
             prefs.setString("token", myToken);
             Navigator.push(context, MaterialPageRoute(builder: (context)=>Dashboard(token: myToken)));
