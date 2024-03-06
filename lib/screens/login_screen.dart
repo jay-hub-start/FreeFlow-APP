@@ -12,8 +12,6 @@ class LoginPage extends StatefulWidget {
   final Function()? onTap;
   const LoginPage({super.key, required this.onTap});
 
-
-
   @override
   // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
@@ -24,25 +22,28 @@ class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   bool _isNotValidate = false;
+  bool _isLoading = false; // New loading indicator flag
   late SharedPreferences prefs;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     initSharedPref();
   }
 
-  void initSharedPref() async{
+  void initSharedPref() async {
     prefs = await SharedPreferences.getInstance();
   }
 
   //sign user in method
   void signUserIn() {
     setState(() {
+      _isLoading = true; // Show loading indicator
       _isNotValidate = false; // Reset validation flag
 
       if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
         _isNotValidate = true; // Set validation flag if any field is empty
+        _isLoading = false; // Hide loading indicator
       } else {
         // Implement sign-in logic here
 
@@ -60,16 +61,23 @@ class _LoginPageState extends State<LoginPage> {
         ).then((response) {
           //debugPrint(response.body); // Print response body to debug console
           var jsonResponse = jsonDecode(response.body);
-          if(jsonResponse["status"] == 200){
+          if (jsonResponse["status"] == 200) {
             var myToken = jsonResponse["token"];
             prefs.setString("token", myToken);
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>Dashboard(token: myToken)));
-          }else{
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Dashboard(token: myToken)),
+            );
+          } else {
             debugPrint("something went wrong");
           }
         }).catchError((error) {
           // Handle network error
           debugPrint(error.toString()); // Print error to debug console
+        }).whenComplete(() {
+          setState(() {
+            _isLoading = false; // Hide loading indicator when complete
+          });
         });
       }
     });
@@ -103,20 +111,19 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 25.0),
-                          child: 
-                        Column(
-                          children: [
-                            SizedBox(height: 60),
-                            Text(
-                              "Welcome back you've been missed",
-                             style: TextStyle(
-                                      color: Color.fromARGB(255, 255, 255, 255),
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                            ),
-                          ],
-                        ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 60),
+                              Text(
+                                "Welcome back you've been missed",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 25),
                         CustomTextField(
@@ -140,8 +147,9 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               Text(
                                 "Forgot Password?",
-                                style: TextStyle(color: Color.fromARGB(255, 71, 48, 1),
-                                decoration: TextDecoration.underline),
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 71, 48, 1),
+                                    decoration: TextDecoration.underline),
                               ),
                             ],
                           ),
@@ -149,6 +157,9 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 25),
                         CustomButton(onTap: signUserIn, text: "Login"),
                         const SizedBox(height: 20),
+                        _isLoading
+                            ? CircularProgressIndicator() // Show loading indicator
+                            : const SizedBox(), // Hide loading indicator
                         const Row(
                           children: [
                             Expanded(
@@ -187,19 +198,21 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Not a member?",
-                            style: TextStyle(color:Colors.white, fontSize: 16),),
+                            const Text(
+                              "Not a member?",
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                            ),
                             const SizedBox(width: 7),
                             GestureDetector(
                               onTap: widget.onTap,
                               child: const Text(
                                 "Register now?",
                                 style: TextStyle(
-                                   color: Color.fromARGB(255, 71, 48, 1),
-                                   fontSize: 16,
+                                  color: Color.fromARGB(255, 71, 48, 1),
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline, // Add underline decoration
-                                   ),
+                                ),
                               ),
                             ),
                           ],
@@ -213,7 +226,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    
     );
   }
 }
