@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:freeflow/screens/dashboard.dart';
+import 'package:freeflow/screens/HomeScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../components/CustomTextfield.dart';
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
             prefs.setString("token", myToken);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Dashboard(token: myToken)),
+              MaterialPageRoute(builder: (context) => HomeScreen(token: myToken)),
             );
           } else {
             debugPrint("something went wrong");
