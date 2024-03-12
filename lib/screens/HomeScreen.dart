@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // }
 
     List<dynamic> foodBankData = await FoodBankService.instance.getFoodBanks(address);
-    shelterMarkers = await FoodBankService.instance.addMarkers(apiData: foodBankData);
+    shelterMarkers.addAll(await FoodBankService.instance.addMarkers(apiData: foodBankData));
 
   } else {
     print('Location data not available');
