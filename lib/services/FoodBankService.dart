@@ -27,9 +27,9 @@ Future<List<Marker>> addMarkers({required List<dynamic> apiData}) async {
       Marker(
         key: UniqueKey(),
         point: LatLng(lat, long),
-        width: 60,
-        height: 60,
-        child: CustomMarker(pathToAsset: 'lib/images/shelter.svg', label: "shelter labels"),
+        width: 65,
+        height: 65,
+        child: CustomMarker(pathToAsset: 'lib/images/foodBank.svg', label: "food Bank labels"),
       ),
     );
   }
@@ -40,10 +40,11 @@ Future<List<Marker>> addMarkers({required List<dynamic> apiData}) async {
 
 
   Future<dynamic> getFoodBanks(address) async {
+    final state = getStateAbbreviation(address.administrativeArea);
     try {
       final response = await http.post(
         Uri.https('www.feedingamerica.org', '/ws-api/GetOrganizationsByState', {
-          'state': 'AL',
+          'state': state,
           'orgFields': 'OrganizationID,MailAddress',
         }),
       );
@@ -58,6 +59,68 @@ Future<List<Marker>> addMarkers({required List<dynamic> apiData}) async {
       print('Error: $e');
     }
     return null;
+  }
+}
+
+String getStateAbbreviation(String stateFullName) {
+  final stateAbbreviations = {
+    'alabama': 'AL',
+    'alaska': 'AK',
+    'arizona': 'AZ',
+    'arkansas': 'AR',
+    'california': 'CA',
+    'colorado': 'CO',
+    'connecticut': 'CT',
+    'delaware': 'DE',
+    'florida': 'FL',
+    'georgia': 'GA',
+    'hawaii': 'HI',
+    'idaho': 'ID',
+    'illinois': 'IL',
+    'indiana': 'IN',
+    'iowa': 'IA',
+    'kansas': 'KS',
+    'kentucky': 'KY',
+    'louisiana': 'LA',
+    'maine': 'ME',
+    'maryland': 'MD',
+    'massachusetts': 'MA',
+    'michigan': 'MI',
+    'minnesota': 'MN',
+    'mississippi': 'MS',
+    'missouri': 'MO',
+    'montana': 'MT',
+    'nebraska': 'NE',
+    'nevada': 'NV',
+    'new hampshire': 'NH',
+    'new jersey': 'NJ',
+    'new mexico': 'NM',
+    'new york': 'NY',
+    'north carolina': 'NC',
+    'north dakota': 'ND',
+    'ohio': 'OH',
+    'oklahoma': 'OK',
+    'oregon': 'OR',
+    'pennsylvania': 'PA',
+    'rhode island': 'RI',
+    'south carolina': 'SC',
+    'south dakota': 'SD',
+    'tennessee': 'TN',
+    'texas': 'TX',
+    'utah': 'UT',
+    'vermont': 'VT',
+    'virginia': 'VA',
+    'washington': 'WA',
+    'west virginia': 'WV',
+    'wisconsin': 'WI',
+    'wyoming': 'WY',
+  };
+
+  String stateFullNameLowerCase = stateFullName.toLowerCase();
+  if (stateAbbreviations.containsKey(stateFullNameLowerCase)) {
+    return stateAbbreviations[stateFullNameLowerCase]!;
+  } else {
+    return stateFullName.toUpperCase().substring(0, 2); // Fallback to first two characters
   }
 }
 
