@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
           "email": usernameController.text,
           "password": passwordController.text,
         };
-        debugPrint("started");
+
         // Send HTTP POST request
         http.post(
           Uri.parse(login),

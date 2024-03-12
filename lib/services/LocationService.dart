@@ -72,4 +72,6 @@ class LocationService{
       controller.updateUserLocation(userLocation);
       controller.isAccessingLocation(false);
     }
+
+    
 }

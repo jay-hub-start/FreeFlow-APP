@@ -17,6 +17,10 @@ dependencies:
   location: ^5.0.3
   permission_handler: ^11.3.0
   get: ^4.6.6
+  flutter_map_location_marker: ^8.0.8
+  geocoding: ^2.2.1
+  flutter_svg: ^2.0.10+1
+  google_maps_flutter: ^2.6.0
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +33,4 @@ flutter:
   assets:
   - lib/images/google.jpg
   - lib/images/apple.jpg
+  - lib/images/shelter.svg
