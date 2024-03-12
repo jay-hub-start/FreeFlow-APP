@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     long = locationData?.longitude.toString() ?? '';
     address = await locationController.getUserAddress(lat: lat, long: long);
 
-    updateMarkers();
+    //updateMarkers();
   }
   
 
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _radiusTimer = Timer(const Duration(milliseconds: 2000), () {
                                   // Print the final radius value to the screen
                                   showSnackBar('Updated radius: $radius');
-                                  updateMarkers();
+                                  //updateMarkers();
                                 });
                               }
                             },

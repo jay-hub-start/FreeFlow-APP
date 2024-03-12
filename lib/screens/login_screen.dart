@@ -37,51 +37,68 @@ class _LoginPageState extends State<LoginPage> {
 
   //sign user in method
   void signUserIn() {
-    setState(() {
-      _isLoading = true; // Show loading indicator
-      _isNotValidate = false; // Reset validation flag
+  setState(() {
+    _isLoading = true; // Show loading indicator
+    _isNotValidate = false; // Reset validation flag
 
-      if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
-        _isNotValidate = true; // Set validation flag if any field is empty
-        _isLoading = false; // Hide loading indicator
-      } else {
-        // Implement sign-in logic here
+    if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
+      _isNotValidate = true; // Set validation flag if any field is empty
+      _isLoading = false; // Hide loading indicator
+    } else {
+      // Create object with email and password
+      var regBody = {
+        "email": usernameController.text,
+        "password": passwordController.text,
+      };
 
-        // Create object with email and password
-        var regBody = {
-          "email": usernameController.text,
-          "password": passwordController.text,
-        };
-
-        // Send HTTP POST request
-        http.post(
-          Uri.parse(login),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(regBody),
-        ).then((response) {
-          //debugPrint(response.body); // Print response body to debug console
-          var jsonResponse = jsonDecode(response.body);
-          if (jsonResponse["status"] == 200) {
-            var myToken = jsonResponse["token"];
-            prefs.setString("token", myToken);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen(token: myToken)),
-            );
-          } else {
-            debugPrint("something went wrong");
-          }
-        }).catchError((error) {
-          // Handle network error
-          debugPrint(error.toString()); // Print error to debug console
-        }).whenComplete(() {
-          setState(() {
-            _isLoading = false; // Hide loading indicator when complete
-          });
+      // Send HTTP POST request
+      http.post(
+        Uri.parse(login),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(regBody),
+      ).then((response) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse["status"] == 200) {
+          var myToken = jsonResponse["token"];
+          prefs.setString("token", myToken);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen(token: myToken)),
+          );
+        } else if (jsonResponse["status"] == 401) {
+          // User doesn't exist or password is incorrect
+          String message = jsonResponse["message"];
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Login Failed"),
+                content: Text(message),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text("OK"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          debugPrint("something went wrong");
+        }
+      }).catchError((error) {
+        // Handle network error
+        debugPrint(error.toString()); // Print error to debug console
+      }).whenComplete(() {
+        setState(() {
+          _isLoading = false; // Hide loading indicator when complete
         });
-      }
-    });
-  }
+      });
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
