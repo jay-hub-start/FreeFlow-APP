@@ -1,6 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'dart:async';
+import "package:freeflow/components/CustomMarker.dart";
+
 
 class ShelterService {
   ShelterService._privateConstructor();
@@ -8,6 +13,23 @@ class ShelterService {
   static final ShelterService _instance = ShelterService._privateConstructor();
 
   static ShelterService get instance => _instance;
+
+  Future <List<Marker>> addMarkers({required shelterData}) async{
+    List<Marker> shelterMarkers = shelterData!.map<Marker>((shelter) {
+        double shelterlat = double.parse(shelter['location'].split(',')[0]);
+        double shelterlong = double.parse(shelter['location'].split(',')[1]);
+
+        return Marker(
+          key:  UniqueKey(),
+          point: LatLng(shelterlat, shelterlong), // Use shelterlat and shelterlong
+          width: 60,
+          height: 60,
+          child: CustomMarker(pathToAsset: 'lib/images/shelter.svg', label: "shelter labels"),
+        );
+      }).toList();
+
+      return shelterMarkers;
+  }
 
   Future<dynamic> getShelters(lat, long, radius) async {
    // print(lat + " long " + long +" radius" + radius);

@@ -9,8 +9,7 @@ import "package:flutter_map_location_marker/flutter_map_location_marker.dart";
 import "package:freeflow/services/ShelterService.dart";
 import 'package:geocoding/geocoding.dart';
 import 'dart:async';
-import "package:flutter_svg/flutter_svg.dart";
-import "package:freeflow/components/CustomMarker.dart";
+import "package:freeflow/services/FoodBankService.dart";
 
 
 class HomeScreen extends StatefulWidget {
@@ -56,33 +55,24 @@ class _HomeScreenState extends State<HomeScreen> {
     long = locationData?.longitude.toString() ?? '';
     address = await locationController.getUserAddress(lat: lat, long: long);
 
-    //updateMarkers();
+    updateMarkers();
   }
   
 
   void updateMarkers() async {
   if (lat.isNotEmpty && long.isNotEmpty) {
-    // ...
 
-    shelterData = await ShelterService.instance.getShelters(lat, long, radius.toString());
+    // this is the code for the shelter api
+    // shelterData = await ShelterService.instance.getShelters(lat, long, radius.toString());
+    // if (shelterData != null) {
+    //   shelterMarkers = await ShelterService.instance.addMarkers(shelterData: shelterData);
+    // } else {
+    //   print('Shelter data not available');
+    // }
 
-    if (shelterData != null) {
-      shelterMarkers = shelterData!.map<Marker>((shelter) {
-        double shelterlat = double.parse(shelter['location'].split(',')[0]);
-        double shelterlong = double.parse(shelter['location'].split(',')[1]);
+    List<dynamic> foodBankData = await FoodBankService.instance.getFoodBanks(address);
+    shelterMarkers = await FoodBankService.instance.addMarkers(apiData: foodBankData);
 
-        return Marker(
-          key:  UniqueKey(),
-          point: LatLng(shelterlat, shelterlong), // Use shelterlat and shelterlong
-          width: 60,
-          height: 60,
-          child: CustomMarker(pathToAsset: 'lib/images/shelter.svg', label: "shelter labels"),
-        );
-      }).toList();
-      setState(() {});
-    } else {
-      print('Shelter data not available');
-    }
   } else {
     print('Location data not available');
   }
@@ -146,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _radiusTimer = Timer(const Duration(milliseconds: 2000), () {
                                   // Print the final radius value to the screen
                                   showSnackBar('Updated radius: $radius');
-                                  //updateMarkers();
+                                  updateMarkers();
                                 });
                               }
                             },
