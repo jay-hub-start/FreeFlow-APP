@@ -14,17 +14,24 @@ class ShelterService {
 
   static ShelterService get instance => _instance;
 
-  Future <List<Marker>> addMarkers({required shelterData}) async{
+  Future <List<Marker>> addMarkers({required shelterData, required , locationController, required Function(List<LatLng>) onPolylineUpdate, required GlobalKey<ScaffoldState> scaffoldKey}) async{
     List<Marker> shelterMarkers = shelterData!.map<Marker>((shelter) {
-        double shelterlat = double.parse(shelter['location'].split(',')[0]);
-        double shelterlong = double.parse(shelter['location'].split(',')[1]);
+        double lat = double.parse(shelter['location'].split(',')[0]);
+        double long = double.parse(shelter['location'].split(',')[1]);
 
         return Marker(
           key:  UniqueKey(),
-          point: LatLng(shelterlat, shelterlong), // Use shelterlat and shelterlong
+          point: LatLng(lat, long), // Use shelterlat and shelterlong
           width: 60,
           height: 60,
-          child: CustomMarker(pathToAsset: 'lib/images/shelter.svg', label: "shelter labels"),
+          child: CustomMarker(
+            pathToAsset: 'lib/images/shelter.svg',
+             label: "shelter labels",
+             markerLocation: LatLng(lat, long), // Pass the marker's location
+              locationController: locationController,
+              onPolylineUpdate : onPolylineUpdate,
+              scaffoldKey: scaffoldKey
+          )
         );
       }).toList();
 

@@ -1,16 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:latlong2/latlong.dart';
-import "package:freeflow/controller/location_controller.dart"; 
+import "package:freeflow/controller/location_controller.dart";
 import "package:freeflow/services/LocationService.dart";
 import 'package:get/get.dart';
-import "package:flutter_map_location_marker/flutter_map_location_marker.dart"; 
+import "package:flutter_map_location_marker/flutter_map_location_marker.dart";
 import "package:freeflow/services/ShelterService.dart";
 import 'package:geocoding/geocoding.dart';
 import 'dart:async';
 import "package:freeflow/services/FoodBankService.dart";
-
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import "package:freeflow/services/MapServices.dart";
 
 class HomeScreen extends StatefulWidget {
   final token;
@@ -30,9 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _radiusTimer; // Timer instance variable
   late Placemark address;
 
+  late List<LatLng> polylines = [];
+  List listOfPoints = [];
+  final mapServices = MapServices();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  
+
   final LocationController locationController =
       Get.put<LocationController>(LocationController());
-  List<Marker> shelterMarkers= [];
+  List<Marker> shelterMarkers = [];
 
   @override
   void initState() {
@@ -43,10 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _getUserLocation();
   }
-  
 
   Future<void> _getUserLocation() async {
-    final locationController = Get.put(LocationController());
+    
     await LocationService.instance
         .getUserLocation(controller: locationController);
 
@@ -54,25 +63,34 @@ class _HomeScreenState extends State<HomeScreen> {
     lat = locationData?.latitude.toString() ?? '';
     long = locationData?.longitude.toString() ?? '';
     address = await locationController.getUserAddress(lat: lat, long: long);
-
     updateMarkers();
   }
-  
+
+void updatePolylines(List<LatLng> newPolylines) {
+  print("called");
+  print(polylines);
+  print("new");
+  print(newPolylines);
+  setState(() {
+    polylines = newPolylines;
+  });
+}
+
+
+
 
   void updateMarkers() async {
   if (lat.isNotEmpty && long.isNotEmpty) {
-
     // this is the code for the shelter api
-    // shelterData = await ShelterService.instance.getShelters(lat, long, radius.toString());
-    // if (shelterData != null) {
-    //   shelterMarkers = await ShelterService.instance.addMarkers(shelterData: shelterData);
-    // } else {
-    //   print('Shelter data not available');
-    // }
-
-    List<dynamic> foodBankData = await FoodBankService.instance.getFoodBanks(address);
-    shelterMarkers.addAll(await FoodBankService.instance.addMarkers(apiData: foodBankData));
-
+      // shelterData = await ShelterService.instance.getShelters(lat, long, radius.toString());
+      // if (shelterData != null) {
+      //   shelterMarkers = await ShelterService.instance.addMarkers(shelterData: shelterData, locationController: locationController, onPolylineUpdate:updatePolylines, scaffoldKey: scaffoldKey);
+      // } else {
+      //   print('Shelter data not available');
+      // }
+    List<dynamic> foodBankData =
+        await FoodBankService.instance.getFoodBanks(address);
+    shelterMarkers.addAll(await FoodBankService.instance.addMarkers(apiData: foodBankData, locationController: locationController, onPolylineUpdate:updatePolylines, scaffoldKey: scaffoldKey));
   } else {
     print('Location data not available');
   }
@@ -90,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Obx(
@@ -127,15 +146,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 // Update the radius variable when the user changes the visible radius
                                 setState(() {
-                                  lat = mapPosition.center?.latitude.toString() ?? "";
-                                  long = mapPosition.center?.longitude.toString() ?? "";
+                                  lat =
+                                      mapPosition.center?.latitude.toString() ??
+                                          "";
+                                  long = mapPosition.center?.longitude
+                                          .toString() ??
+                                      "";
                                   radius = mapPosition.zoom! / 10;
                                 });
 
                                 // Start a new timer to delay the printing action
-                                _radiusTimer = Timer(const Duration(milliseconds: 2000), () {
+                                _radiusTimer = Timer(
+                                    const Duration(milliseconds: 2000), () {
                                   // Print the final radius value to the screen
-                                  showSnackBar('Updated radius: $radius');
+                                  showSnackBar('Updating Map');
+                                  print('(${lat},${long})');
                                   updateMarkers();
                                 });
                               }
@@ -150,6 +175,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             CurrentLocationLayer(),
                             MarkerLayer(
                               markers: shelterMarkers,
+                            ),
+                            PolylineLayer(
+                              polylineCulling: false,
+                              polylines: [
+                                Polyline(
+                                  points: polylines,
+                                  color: Colors.blue,
+                                  strokeWidth: 5,
+                                ),
+                              ],
                             ),
                           ],
                         ),

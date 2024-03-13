@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:async';
 import "package:freeflow/components/CustomMarker.dart";
+import "package:freeflow/controller/location_controller.dart";
+
 
 class FoodBankService {
   FoodBankService._privateConstructor();
@@ -13,7 +16,7 @@ class FoodBankService {
 
   static FoodBankService get instance => _instance;
 
-Future<List<Marker>> addMarkers({required List<dynamic> apiData}) async {
+Future<List<Marker>> addMarkers({required List<dynamic> apiData, required LocationController locationController, required Function(List<LatLng>) onPolylineUpdate, required GlobalKey<ScaffoldState> scaffoldKey}) async {
   List<Marker> markers = [];
 
   for (var orgData in apiData) {
@@ -22,22 +25,27 @@ Future<List<Marker>> addMarkers({required List<dynamic> apiData}) async {
 
     double lat = address['Latitude'];
     double long = address['Longitude'];
-
+    print(org);
     markers.add(
       Marker(
         key: UniqueKey(),
         point: LatLng(lat, long),
         width: 65,
         height: 65,
-        child: CustomMarker(pathToAsset: 'lib/images/foodBank.svg', label: "food Bank labels"),
+        child: CustomMarker(
+          pathToAsset: 'lib/images/foodBank.svg',
+          label: "food Bank labels",
+          markerLocation: LatLng(lat, long), // Pass the marker's location
+          locationController: locationController,
+          onPolylineUpdate : onPolylineUpdate,
+          scaffoldKey: scaffoldKey,
+        ),
       ),
     );
   }
 
   return markers;
 }
-
-
 
   Future<dynamic> getFoodBanks(address) async {
     final state = getStateAbbreviation(address.administrativeArea);
@@ -123,4 +131,3 @@ String getStateAbbreviation(String stateFullName) {
     return stateFullName.toUpperCase().substring(0, 2); // Fallback to first two characters
   }
 }
-
