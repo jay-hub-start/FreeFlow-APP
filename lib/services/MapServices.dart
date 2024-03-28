@@ -18,8 +18,6 @@ class MapServices {
   Future<http.Response> getRouteUrl(
       {required String startPoint, required String endPoint}) async {
     String uri = '$baseUrl?api_key=$apiKey&start=$startPoint&end=$endPoint';
-    print(uri);
-
     return http.get(Uri.parse(uri));
   }
 

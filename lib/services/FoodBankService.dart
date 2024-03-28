@@ -25,7 +25,7 @@ Future<List<Marker>> addMarkers({required List<dynamic> apiData, required Locati
 
     double lat = address['Latitude'];
     double long = address['Longitude'];
-    print(org);
+
     markers.add(
       Marker(
         key: UniqueKey(),

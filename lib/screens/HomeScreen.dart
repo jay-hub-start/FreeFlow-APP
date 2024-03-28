@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:latlong2/latlong.dart';
@@ -35,10 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
   late Placemark address;
 
   late List<LatLng> polylines = [];
+  late List<LatLng> busPolylines = [];
   List listOfPoints = [];
   final mapServices = MapServices();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  
 
   final LocationController locationController =
       Get.put<LocationController>(LocationController());
@@ -55,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getUserLocation() async {
-    
     await LocationService.instance
         .getUserLocation(controller: locationController);
 
@@ -66,36 +64,41 @@ class _HomeScreenState extends State<HomeScreen> {
     updateMarkers();
   }
 
-void updatePolylines(List<LatLng> newPolylines) {
-  print("called");
-  print(polylines);
-  print("new");
-  print(newPolylines);
-  setState(() {
-    polylines = newPolylines;
-  });
-}
+  void updatePolylines(List<LatLng> newPolylines) {
+    setState(() {
+      polylines = newPolylines;
+    });
+  }
 
-
-
+  void updateBusRoutes() async {
+    // busPolylines = mapServices.getBusRoute(startPoint, endPoint)
+    debugPrint("open");
+  }
 
   void updateMarkers() async {
-  if (lat.isNotEmpty && long.isNotEmpty) {
-    // this is the code for the shelter api
-      // shelterData = await ShelterService.instance.getShelters(lat, long, radius.toString());
-      // if (shelterData != null) {
-      //   shelterMarkers = await ShelterService.instance.addMarkers(shelterData: shelterData, locationController: locationController, onPolylineUpdate:updatePolylines, scaffoldKey: scaffoldKey);
-      // } else {
-      //   print('Shelter data not available');
-      // }
-    List<dynamic> foodBankData =
-        await FoodBankService.instance.getFoodBanks(address);
-    shelterMarkers.addAll(await FoodBankService.instance.addMarkers(apiData: foodBankData, locationController: locationController, onPolylineUpdate:updatePolylines, scaffoldKey: scaffoldKey));
-  } else {
-    print('Location data not available');
+    if (lat.isNotEmpty && long.isNotEmpty) {
+      shelterData = await ShelterService.instance
+          .getShelters(lat, long, 10);
+      if (shelterData != null) {
+        shelterMarkers.addAll(await ShelterService.instance.addMarkers(
+            shelterData: shelterData,
+            locationController: locationController,
+            onPolylineUpdate: updatePolylines,
+            scaffoldKey: scaffoldKey));
+      } else {
+        print('Shelter data not available');
+      }
+      List<dynamic> foodBankData =
+          await FoodBankService.instance.getFoodBanks(address);
+      shelterMarkers.addAll(await FoodBankService.instance.addMarkers(
+          apiData: foodBankData,
+          locationController: locationController,
+          onPolylineUpdate: updatePolylines,
+          scaffoldKey: scaffoldKey));
+    } else {
+      print('Location data not available');
+    }
   }
-}
-
 
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +111,6 @@ void updatePolylines(List<LatLng> newPolylines) {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Obx(
@@ -162,6 +164,7 @@ void updatePolylines(List<LatLng> newPolylines) {
                                   showSnackBar('Updating Map');
                                   print('(${lat},${long})');
                                   updateMarkers();
+                                  updateBusRoutes();
                                 });
                               }
                             },
