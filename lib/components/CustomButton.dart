@@ -6,13 +6,12 @@ class CustomButton extends StatelessWidget {
   final double fontSizePercentage;
   final String text;
 
-  // ignore: use_super_parameters
-  const CustomButton(   {
+  const CustomButton({
     Key? key,
     this.onTap,
     required this.text,
     this.heightPercentage = 0.07, // Set default height percentage
-    this.fontSizePercentage = 0.035,  buttonColor,
+    this.fontSizePercentage = 0.035,
   }) : super(key: key);
 
   @override

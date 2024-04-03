@@ -1,3 +1,3 @@
-   final url = "http://192.168.222.34:3000/";
+   final url = "https://mobilebackend-qa1c.onrender.com/";
    final registration = url+ "registration";
    final login = url+"login";
